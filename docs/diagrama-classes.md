@@ -1,7 +1,5 @@
 # Diagrama de classes UML
 
-O diagrama abaixo usa Mermaid. Ele pode ser visualizado no GitHub, no GitLab ou em qualquer editor compatível com Mermaid.
-
 ```mermaid
 classDiagram
     direction LR
