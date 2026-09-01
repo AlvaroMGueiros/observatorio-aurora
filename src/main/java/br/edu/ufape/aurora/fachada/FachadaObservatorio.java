@@ -1,6 +1,7 @@
 package br.edu.ufape.aurora.fachada;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,10 +22,14 @@ public class FachadaObservatorio implements OperacoesObservatorio {
     private final GestaoSessao gestaoSessao;
 
     public FachadaObservatorio() {
-        this(Path.of("dados"));
+        this(Path.of("dados"), Clock.systemDefaultZone());
     }
 
     public FachadaObservatorio(Path diretorioDados) {
+        this(diretorioDados, Clock.systemDefaultZone());
+    }
+
+    public FachadaObservatorio(Path diretorioDados, Clock relogio) {
         Repositorio<PessoaObservadora> repositorioObservador = new RepositorioArquivo<>(
                 diretorioDados, "observadores.ser", PessoaObservadora.class);
         Repositorio<Telescopio> repositorioTelescopio = new RepositorioArquivo<>(
@@ -35,7 +40,7 @@ public class FachadaObservatorio implements OperacoesObservatorio {
         cadastroObservador = new CadastroObservador(repositorioObservador);
         cadastroTelescopio = new CadastroTelescopio(repositorioTelescopio);
         gestaoSessao = new GestaoSessao(
-                repositorioSessao, cadastroObservador, cadastroTelescopio);
+                repositorioSessao, cadastroObservador, cadastroTelescopio, relogio);
     }
 
     @Override

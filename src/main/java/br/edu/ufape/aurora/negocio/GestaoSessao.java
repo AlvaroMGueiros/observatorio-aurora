@@ -1,8 +1,10 @@
 package br.edu.ufape.aurora.negocio;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import br.edu.ufape.aurora.dados.Repositorio;
 import br.edu.ufape.aurora.excecao.PersistenciaException;
@@ -16,12 +18,20 @@ public class GestaoSessao {
     private final Repositorio<SessaoObservacao> repositorio;
     private final CadastroObservador cadastroObservador;
     private final CadastroTelescopio cadastroTelescopio;
+    private final Clock relogio;
 
     public GestaoSessao(Repositorio<SessaoObservacao> repositorio,
             CadastroObservador cadastroObservador, CadastroTelescopio cadastroTelescopio) {
+        this(repositorio, cadastroObservador, cadastroTelescopio, Clock.systemDefaultZone());
+    }
+
+    public GestaoSessao(Repositorio<SessaoObservacao> repositorio,
+            CadastroObservador cadastroObservador, CadastroTelescopio cadastroTelescopio,
+            Clock relogio) {
         this.repositorio = repositorio;
         this.cadastroObservador = cadastroObservador;
         this.cadastroTelescopio = cadastroTelescopio;
+        this.relogio = Objects.requireNonNull(relogio, "O relógio do sistema é obrigatório.");
     }
 
     public SessaoObservacao agendar(String observadorId, String telescopioId, String alvoCeleste,
@@ -41,7 +51,7 @@ public class GestaoSessao {
         }
 
         String alvoValidado = Validador.textoObrigatorio(alvoCeleste, "alvo celeste");
-        if (inicio == null || !inicio.isAfter(LocalDateTime.now())) {
+        if (inicio == null || !inicio.isAfter(LocalDateTime.now(relogio))) {
             throw new RegraNegocioException("A sessão deve começar em uma data e hora futuras.");
         }
         if (duracaoMinutos < 15 || duracaoMinutos > 480) {
@@ -58,6 +68,9 @@ public class GestaoSessao {
     public SessaoObservacao concluir(String sessaoId, int qualidadeCeu, String anotacoes)
             throws RegraNegocioException, PersistenciaException {
         SessaoObservacao sessao = buscarSessaoAgendada(sessaoId);
+        if (LocalDateTime.now(relogio).isBefore(sessao.getInicio())) {
+            throw new RegraNegocioException("Uma sessão futura não pode ser concluída.");
+        }
         if (qualidadeCeu < 1 || qualidadeCeu > 5) {
             throw new RegraNegocioException("A qualidade do céu deve ser avaliada de 1 a 5.");
         }
@@ -72,6 +85,9 @@ public class GestaoSessao {
     public SessaoObservacao cancelar(String sessaoId)
             throws RegraNegocioException, PersistenciaException {
         SessaoObservacao sessao = buscarSessaoAgendada(sessaoId);
+        if (!LocalDateTime.now(relogio).isBefore(sessao.getInicio())) {
+            throw new RegraNegocioException("Uma sessão iniciada não pode ser cancelada.");
+        }
         sessao.setStatus(StatusSessao.CANCELADA);
         repositorio.atualizar(sessao);
         return sessao;

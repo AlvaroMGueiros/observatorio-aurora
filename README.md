@@ -2,6 +2,10 @@
 
 Sistema de console para organizar uma comunidade de observação astronômica. O projeto permite cadastrar diferentes perfis de observadores, catalogar telescópios, reservar horários sem conflitos e manter um diário das sessões realizadas.
 
+## Equipe
+
+- Álvaro Miguel Gueiros
+
 ## Tema e escopo
 
 O Observatório Aurora atende um pequeno observatório comunitário que recebe astrônomos amadores e pesquisadores. O sistema cuida do ciclo operacional da observação: cadastro dos participantes e equipamentos, agendamento, prevenção de reservas simultâneas, cancelamento e registro do resultado da noite.
@@ -18,6 +22,7 @@ O escopo não inclui autenticação, pagamentos, controle de estoque, interface 
 - Impedir conflito de horário para o mesmo observador ou telescópio.
 - Cancelar somente sessões ainda agendadas.
 - Concluir uma sessão com avaliação do céu e anotações de campo.
+- Impedir a conclusão de sessões futuras e o cancelamento de sessões já iniciadas.
 - Listar observadores, telescópios e sessões em ordem útil.
 - Persistir todos os registros em arquivos `.ser` por serialização de objetos.
 - Informar erros específicos por meio de exceções de negócio e persistência.
@@ -48,6 +53,8 @@ observatorio-aurora/
 │   ├── modelo/      entidades, herança e enums
 │   ├── negocio/     validações e regras de negócio
 │   └── ui/          menu de console
+├── src/test/java/br/edu/ufape/aurora/
+│   └── testes automáticos de integração e encapsulamento
 └── pom.xml
 ```
 
@@ -60,6 +67,12 @@ Pré-requisitos: JDK 17 ou mais recente e Maven 3.9 ou mais recente.
 ```bash
 mvn package
 java -jar target/observatorio-aurora-1.0.0.jar
+```
+
+Para executar somente os testes automáticos:
+
+```bash
+mvn test
 ```
 
 Também é possível compilar sem Maven:
